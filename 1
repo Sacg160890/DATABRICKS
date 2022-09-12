@@ -1,0 +1,33 @@
+dbuilts.fs.ls("/FileStore/tables/") # extension for importing excel library
+pip install openyxl # extension for importing excel library
+
+import pandas as pd
+#from pandas import ExcelFile#
+
+file_location = "/dbfs/FileStore/tables/06092022_BaseTaxCalc_Contribucion_Facturas__1_-2.xlsx"
+
+all_sheets_df = pd.read_excel(file_location, na_values = "Missing",sheet_name = None)
+
+#facturas 
+#fill null values with an empty string#
+
+all_sheets_df['Sheet1'].fillna('',inplace=True)
+
+#contribuciones
+#fill null values with an empty string
+
+all_sheets_df['Sheet2'].fillna('',inplace=True)
+
+
+df =spark.createDataFrame(all_sheets_df['Sheet1'])
+df1=spark.createDataFrame(all_sheets_df['Sheet2'])
+
+
+permanent_table_name = 'Sheet1'
+permanent_table_name_contribuciones = 'Sheet2'
+#Gold schema for facturas
+df.write.format("parquet").mode("overwrite").saveAsTable(permanent_table_name)
+#Gold schema for contribuciones
+df1.write.format("parquet").mode("overwrite").saveAsTable(permanent_table_name_contribuciones)
+
+
